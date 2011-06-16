@@ -69,6 +69,8 @@ P8Instrument *P8InstrumentWrangler::createInstrument(P8PrologixGPIBDevice *devic
 	
 SensorReading P8InstrumentWrangler::takeReading(const SensorAddress &sensor)
 {
+	return executeReadingScript(sensor);
+	/*
 	for(list<P8Instrument*>::iterator it=instruments.begin();it!=instruments.end();it++)
 	{
 		if((*it)->instrument_name==sensor.instrument_name)
@@ -82,6 +84,7 @@ SensorReading P8InstrumentWrangler::takeReading(const SensorAddress &sensor)
 	ss << "Could not find instrument: " << sensor.instrument_name;
 	ret.error_value=ss.str();
 	return ret;
+	*/
 }
 
 //--------------------P8GenericLakeshoreInstrument----
@@ -203,4 +206,41 @@ SensorReading::SensorReading()
 	units="UNDEFINED";
 	has_error=false;
 	error_value="UNDEFINED";
+}
+
+SensorReading P8InstrumentWrangler::executeReadingScript(const SensorAddress &sensor)
+{
+	//TODO init a mutex here
+	//scripting format:
+	//INSTRUMENT_NAME: GPIB_COMMAND;
+	// -or-
+	//INSTRUMENT_NAME? GPIB_QUERY;
+	string command;
+	string instrument;
+	bool instrument_error=false;;
+	stringstream commandstream(sensor.read_command);
+	while(getline(commandstream,command,';')) {
+		if(command=="") continue;
+		size_t colonpos=command.find(':');
+		string instrument=command.substr(0,colonpos);
+		bool isquery=false;
+		if(command[colonpos+1]=='?') {isquery=true; colonpos++;};
+		string inst_command=command.substr(colonpos+1,string::npos);
+		cout << "instrument is |" << instrument << "|";
+		cout << "command is |" << inst_command << "|";
+		//TODO call instruments here
+		instrument_error=true;
+	}
+	//TODO end a mutex here
+	SensorReading ret;
+	if(instrument_error==true) {
+		gettimeofday(&ret.timestamp,NULL);
+		ret.address=sensor;
+		ret.has_error=true;
+		stringstream ss;
+		ss << "Could not find instrument: " << sensor.instrument_name;
+		ret.error_value=ss.str();
+	}
+	return ret;
+
 }

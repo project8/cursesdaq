@@ -68,6 +68,7 @@ bool P8EthernetSocket::Connect()
             fSocket = ReturnValue;
         }
 
+		//set my own timeout 
         ReturnValue = connect(fSocket, fAddressInfo->ai_addr, fAddressInfo->ai_addrlen);
         if( ReturnValue == -1 )
         {

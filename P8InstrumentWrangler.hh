@@ -65,6 +65,7 @@ public:
 	P8Instrument *connectToInstrument(string IPv4address,int gpib_address,string name);
 	P8Instrument *createInstrument(P8PrologixGPIBDevice *device,string name);
 	SensorReading takeReading(const SensorAddress &sensor);
+	SensorReading executeReadingScript(const SensorAddress &sensor);
 
 	list<P8Instrument*> instruments;
 	string last_error;

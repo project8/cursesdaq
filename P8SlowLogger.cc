@@ -131,10 +131,10 @@ void P8SlowLogger::load_config_file(string fname)
 		} else
 		if(type=="SENSOR")
 		{
-			string name,inst,command;
+			string name,command;
 			double minlts,maxlts,minch;
 
-			ss >> name >> inst;
+			ss >> name;
 			string com;
 			getline(ss,com,'\"'); //read command in quotes
 			getline(ss,com,'\"');
@@ -142,7 +142,7 @@ void P8SlowLogger::load_config_file(string fname)
 		    ss >> minlts >> maxlts >> minch >> un;
 			cerr << "adding sensor " << name << endl;
 			P8SlowLoggerSensor toadd;
-			toadd.address=SensorAddress(inst,com);
+			toadd.address=SensorAddress("",com);
 			toadd.name=name;
 			toadd.min_log_time_spacing=minlts;
 			toadd.max_log_time_spacing=maxlts;
