@@ -70,6 +70,7 @@ bool P8EthernetSocket::Connect()
             fSocket = ReturnValue;
         }
 
+// /*
 		//make the socket nonblocking
 		fcntl(fSocket,F_SETFL,fcntl(fSocket,F_GETFL,0) | O_NONBLOCK);
 
@@ -80,7 +81,7 @@ bool P8EthernetSocket::Connect()
 		wait_time.tv_sec=connection_timeout_seconds;
 		wait_time.tv_usec=0;
         ReturnValue = connect(fSocket, fAddressInfo->ai_addr, fAddressInfo->ai_addrlen);
-		int select_ret=select(1,&mysocketset,NULL,NULL,&wait_time);
+		int select_ret=select(fSocket+1,&mysocketset,&mysocketset,&mysocketset,&wait_time);
 		//make the socket blocking again
 		fcntl(fSocket,F_SETFL,fcntl(fSocket,F_GETFL,0) ^ O_NONBLOCK);
 
@@ -93,6 +94,7 @@ bool P8EthernetSocket::Connect()
 			cerr << "select returned error trying to connect to " << fIPv4Address << endl;
 			return false;
 		}
+//*/
 	
 		/*
         ReturnValue = connect(fSocket, fAddressInfo->ai_addr, fAddressInfo->ai_addrlen);
