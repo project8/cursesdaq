@@ -10,6 +10,7 @@
 #include <iostream>
 //#include <poll.h>
 #include <sys/select.h>
+#include <errno.h>
 using std::cerr;
 using std::endl;
 
@@ -21,6 +22,7 @@ P8EthernetSocket::P8EthernetSocket() :
     fSocket(0),
     fAddressInfo(0)
 {
+	connection_timeout_seconds=5;
 }
 
 P8EthernetSocket::~P8EthernetSocket()
@@ -68,13 +70,38 @@ bool P8EthernetSocket::Connect()
             fSocket = ReturnValue;
         }
 
-		//set my own timeout 
+		//make the socket nonblocking
+		fcntl(fSocket,F_SETFL,fcntl(fSocket,F_GETFL,0) | O_NONBLOCK);
+
+		fd_set mysocketset;
+		FD_ZERO(&mysocketset);
+		FD_SET(fSocket,&mysocketset);
+		struct timeval wait_time;
+		wait_time.tv_sec=connection_timeout_seconds;
+		wait_time.tv_usec=0;
+        ReturnValue = connect(fSocket, fAddressInfo->ai_addr, fAddressInfo->ai_addrlen);
+		int select_ret=select(1,&mysocketset,NULL,NULL,&wait_time);
+		//make the socket blocking again
+		fcntl(fSocket,F_SETFL,fcntl(fSocket,F_GETFL,0) ^ O_NONBLOCK);
+
+		if(select_ret==0) {
+			cerr << "timed out while trying to connect to " << fIPv4Address << endl;
+			errno=ETIMEDOUT;
+			return false;
+		}
+		if(select_ret==-1) {
+			cerr << "select returned error trying to connect to " << fIPv4Address << endl;
+			return false;
+		}
+	
+		/*
         ReturnValue = connect(fSocket, fAddressInfo->ai_addr, fAddressInfo->ai_addrlen);
         if( ReturnValue == -1 )
         {
             cerr << "error creating connection to " << fIPv4Address << endl;
             return false;
         }
+		*/
 
         fConnected = true;
         return true;

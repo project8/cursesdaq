@@ -29,6 +29,7 @@ int main(int argc,char *argv[])
 	screencontrol.init();
     init_pair(1,COLOR_GREEN,COLOR_BLACK);
     init_pair(2,COLOR_WHITE,COLOR_BLACK);
+	init_pair(3,COLOR_WHITE,COLOR_RED);
 	timeout(0);
 
 		struct timeval now;
@@ -89,7 +90,10 @@ TypedText *addReading(SensorReading rdg)
 	ret->death_time=ret->start_time;
 	ret->death_time.tv_sec+=refreshrate;
 	ret->death_time.tv_usec+=(int)(1000000*((double)rand())/((double)RAND_MAX));
-	ret->color=COLOR_PAIR(1);
+	if(!rdg.has_error)
+		ret->color=COLOR_PAIR(1);
+	else
+		ret->color=COLOR_PAIR(3);
 	return ret;
 }
 

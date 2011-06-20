@@ -14,6 +14,8 @@ public:
 	void load_config_file(string fname);
 	SensorReading getLastReading(string sensor_name);
 	string getLogFileName();
+	string getLogFileNameFromStub(string stub);
+	string getLogFileNameFromName(string name);
 	string printSensorReading(SensorReading &reading);
 
 	//call start_thread() to start
@@ -21,6 +23,7 @@ public:
 
 	list<P8SlowLoggerSensor> sensors;
 	string log_file_name;
+	map<string,string> log_file_names;
 	long sleep_time_usec;
 
 	bool running;
@@ -41,6 +44,7 @@ public:
 	double max_log_time_spacing;
 	double min_change_for_logging;
 	string units;
+	string log_name;
 	
 	P8Mutex access_mutex;
 };

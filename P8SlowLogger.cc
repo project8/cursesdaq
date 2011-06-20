@@ -51,8 +51,11 @@ string P8SlowLogger::printSensorReading(SensorReading &reading)
 {
 	char reading_timestamp[256];
 	strftime(reading_timestamp,256,"%Y-%m-%d %H:%M:%S",localtime(&reading.timestamp.tv_sec));
-	char outline[512];
-	sprintf(outline,"%-32s %s.%06d %g %s",reading.sensor_name.c_str(),reading_timestamp,(int)reading.timestamp.tv_usec,reading.value,reading.units.c_str());
+	char outline[1024];
+	if(!reading.has_error)
+		sprintf(outline,"%-32s %s.%06d %g %s",reading.sensor_name.c_str(),reading_timestamp,(int)reading.timestamp.tv_usec,reading.value,reading.units.c_str());
+	else
+		sprintf(outline,"#%-32s %s.%06d Error: %s",reading.sensor_name.c_str(),reading_timestamp,(int)reading.timestamp.tv_usec,reading.error_value.c_str());
 	return string(outline);
 }
 	
@@ -83,7 +86,8 @@ void P8SlowLogger::doLog(P8SlowLoggerSensor &sensor)
 	sensor.access_mutex.Lock();
 	sensor.last_reading=reading;
 	sensor.access_mutex.UnLock();
-	string outfilename=getLogFileName();
+	//string outfilename=getLogFileName();
+	string outfilename=getLogFileNameFromName(sensor.log_name);
 	string outline=printSensorReading(reading);
 //	char reading_timestamp[256];
 //	strftime(reading_timestamp,256,"%Y-%m-%d %H:%M:%S",localtime(&reading.timestamp.tv_sec));
@@ -107,6 +111,26 @@ string P8SlowLogger::getLogFileName()
 	return string(fname);
 }
 
+string P8SlowLogger::getLogFileNameFromStub(string stub)
+{
+	struct timeval tv;
+	gettimeofday(&tv,NULL);
+	struct tm *tvtm=localtime(&(tv.tv_sec));
+	char fname[512];
+	char date_as_char[256];
+	strftime(date_as_char,256,"%Y-%m-%d",tvtm);
+	sprintf(fname,"%s_%s.log",stub.c_str(),date_as_char);
+	return string(fname);
+}
+
+string P8SlowLogger::getLogFileNameFromName(string name)
+{
+	map<string,string>::iterator found=log_file_names.find(name);
+	if(found==log_file_names.end()) return getLogFileNameFromStub("unknown_log");
+	return getLogFileNameFromStub((*found).second);
+}
+
+
 void P8SlowLogger::load_config_file(string fname)
 {
 	ifstream fin(fname.c_str());
@@ -125,9 +149,16 @@ void P8SlowLogger::load_config_file(string fname)
 			int gpib;
 			ss >> name >> ip >> gpib;
 			cerr << "Connecting to instrument: " << name << endl;
+			cout << "Connecting to instrument: " << name << endl;
 			if(instrument_wrangler.connectToInstrument(ip,gpib,name)==NULL)
+			{
 				cerr << "Could not connect: " << instrument_wrangler.last_error << endl;
-			else cerr << "Connected" << endl;
+				cout << "Could not connect: " << instrument_wrangler.last_error << endl;
+			}
+			else {
+				cerr << "Connected" << endl;
+				cout << "Connected" << endl;
+			}
 		} else
 		if(type=="SENSOR")
 		{
@@ -139,8 +170,10 @@ void P8SlowLogger::load_config_file(string fname)
 			getline(ss,com,'\"'); //read command in quotes
 			getline(ss,com,'\"');
 			string un;
-		    ss >> minlts >> maxlts >> minch >> un;
+			string mylogfile;
+		    ss >> minlts >> maxlts >> minch >> un >> mylogfile;
 			cerr << "adding sensor " << name << endl;
+			cout << "adding sensor " << name << endl;
 			P8SlowLoggerSensor toadd;
 			toadd.address=SensorAddress("",com);
 			toadd.name=name;
@@ -149,7 +182,13 @@ void P8SlowLogger::load_config_file(string fname)
 			toadd.min_change_for_logging=minch;
 			toadd.units=un;
 			toadd.last_reading.precision=4;
+			toadd.log_name=mylogfile;
 			sensors.push_back(toadd);
+		} else if (type=="LOGFILE") 
+		{
+			string name,filename;
+			ss >> name >> filename;
+			log_file_names[name]=filename;
 		} else
 		{
 			cerr << "unrecognized type in config file: " << type << endl;
@@ -159,9 +198,11 @@ void P8SlowLogger::load_config_file(string fname)
 	
 	//debug enumerate instruments
 	cerr << "enumerating instruments " << endl;
+	cout << "enumerating instruments " << endl;
 	for(list<P8Instrument*>::iterator it=instrument_wrangler.instruments.begin();it!=instrument_wrangler.instruments.end();it++)
 	{
 		cerr << "Instrument: |" << (*it)->instrument_name << "|" << endl;
+		cout << "Instrument: |" << (*it)->instrument_name << "|" << endl;
 	//	list<SensorAddress> addresses=(*it)->listSensors();
 	}
 }

@@ -206,7 +206,7 @@ P8PrologixConnection *P8PrologixWrangler::connectToBox(const string &ipv4address
 		return ret;
 	} else
 	{
-		last_error="Ethernet Connection Failed: "+string(strerror(errno));
+		last_error="Prologix-Ethernet Connection Failed: "+string(strerror(errno));
 	}
 	delete ret;
 	return NULL;

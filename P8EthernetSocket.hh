@@ -53,6 +53,10 @@ class P8EthernetSocket :
         void SetPort(const string& port);
         const string& GetPort() const;
 
+		void SetTimeout(int timeout_seconds)
+		{ connection_timeout_seconds=timeout_seconds;};
+		int GetTimeout() {return connection_timeout_seconds;};
+
     private:
 		P8Mutex in_use;
         bool fConnected;
@@ -60,6 +64,7 @@ class P8EthernetSocket :
         string fPort;
         int fSocket;
         addrinfo* fAddressInfo;
+		int connection_timeout_seconds;
 };
 
 

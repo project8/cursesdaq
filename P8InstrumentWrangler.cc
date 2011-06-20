@@ -156,6 +156,33 @@ SensorReading P8Instrument::takeReading(const SensorAddress &address)
 	return ret;
 }
 
+void P8Instrument::sendCommand(string command) 
+{
+	prologix_device->sendCommand(command);
+}
+
+SensorReading P8Instrument::sendQuery(string query,const SensorAddress &address)
+{
+	SensorReading ret;
+	gettimeofday(&ret.timestamp,NULL);
+	
+	string reply=prologix_device->sendQuery(query);
+
+	if(reply!="")
+	{
+		ret.value=atof(reply.c_str());
+		ret.has_error=false;
+	} else
+	{
+		ret.has_error=true;
+		stringstream ss;
+		ss << "blank reply returned from instrument.  TODO add further error analysis here." << endl;
+		ret.error_value=ss.str();
+	}
+	return ret;
+}
+
+
 bool P8GenericLakeshoreInstrument::hasSensor(const SensorAddress &address)
 {
 	return true;
@@ -215,6 +242,7 @@ SensorReading P8InstrumentWrangler::executeReadingScript(const SensorAddress &se
 	//INSTRUMENT_NAME: GPIB_COMMAND;
 	// -or-
 	//INSTRUMENT_NAME? GPIB_QUERY;
+	SensorReading ret;
 	string command;
 	string instrument;
 	bool instrument_error=false;;
@@ -222,25 +250,38 @@ SensorReading P8InstrumentWrangler::executeReadingScript(const SensorAddress &se
 	while(getline(commandstream,command,';')) {
 		if(command=="") continue;
 		size_t colonpos=command.find(':');
-		string instrument=command.substr(0,colonpos);
+		instrument=command.substr(0,colonpos);
 		bool isquery=false;
 		if(command[colonpos+1]=='?') {isquery=true; colonpos++;};
 		string inst_command=command.substr(colonpos+1,string::npos);
-		cout << "instrument is |" << instrument << "|";
-		cout << "command is |" << inst_command << "|";
+		while((inst_command.size()>0)&&(inst_command[0]==' ')) inst_command=inst_command.substr(1,inst_command.size()-1); //trim off leading spaces
+		if(inst_command.size()==0) cerr << "error, empty instrument command for insturment " << instrument << endl;
 		//TODO call instruments here
-		instrument_error=true;
+		P8Instrument *pinstrument=getInstrument(instrument);
+		if(pinstrument==NULL) {instrument_error=true; break;}
+		if(isquery)
+			ret=pinstrument->sendQuery(inst_command,sensor);
+		else
+			pinstrument->sendCommand(inst_command);
 	}
 	//TODO end a mutex here
-	SensorReading ret;
 	if(instrument_error==true) {
 		gettimeofday(&ret.timestamp,NULL);
 		ret.address=sensor;
 		ret.has_error=true;
 		stringstream ss;
-		ss << "Could not find instrument: " << sensor.instrument_name;
+		ss << "Could not find instrument: " << instrument;
 		ret.error_value=ss.str();
 	}
 	return ret;
 
+}
+
+P8Instrument *P8InstrumentWrangler::getInstrument(string name)
+{
+	list<P8Instrument*>::iterator it;
+	for(it=instruments.begin();it!=instruments.end();it++)
+		if((*it)->instrument_name==name)
+			return (*it);
+	return NULL;
 }

@@ -12,6 +12,8 @@ public:
 		{instrument_name=nm; IPv4address=ip; gpib_address=gpib; prologix_device=dev;};
 	virtual ~P8Instrument() {};
 
+	virtual void sendCommand(string command);
+	virtual SensorReading sendQuery(string query,const SensorAddress &address);
 	virtual SensorReading takeReading(const SensorAddress &address);
 	virtual bool hasSensor(const SensorAddress &address) {return true;};
 	virtual list<SensorAddress> listSensors() {return list<SensorAddress>();};
@@ -64,6 +66,7 @@ public:
 
 	P8Instrument *connectToInstrument(string IPv4address,int gpib_address,string name);
 	P8Instrument *createInstrument(P8PrologixGPIBDevice *device,string name);
+	P8Instrument *getInstrument(string name);
 	SensorReading takeReading(const SensorAddress &sensor);
 	SensorReading executeReadingScript(const SensorAddress &sensor);
 
