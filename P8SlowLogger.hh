@@ -48,3 +48,15 @@ public:
 	
 	P8Mutex access_mutex;
 };
+
+class P8SlowLoggerCalibration
+{
+public:
+	string name;
+	SensorReading last_reading;
+	double min_log_time_spacing;
+	double max_log_time_spacing;
+	double min_change_for_logging;
+	string units;
+	string log_name;
+};

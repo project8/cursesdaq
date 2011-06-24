@@ -59,10 +59,12 @@ P8Instrument *P8InstrumentWrangler::createInstrument(P8PrologixGPIBDevice *devic
 		ret=new P8E3631(device->getConnection()->GetIPv4Address(),device->getGPIBAddress(),name,device);
 	} else
 	{
-		stringstream ss;
-		ss << "Unable to identify device " << deviceid << " that is to be " << name << endl;
-		last_error=ss.str();
+//		stringstream ss;
+		//ss << "Unable to identify device " << deviceid << " that is to be " << name " returning generic device" << endl;
 		return NULL;
+		cerr << "Unable to identify device " << deviceid << " that is to be " << name << " returning generic device" << endl;
+		ret=new P8Instrument(device->getConnection()->GetIPv4Address(),device->getGPIBAddress(),name,device);
+		return ret;
 	}
 	return ret;
 }
