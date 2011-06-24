@@ -18,6 +18,7 @@ P8InstrumentWrangler::~P8InstrumentWrangler()
 	
 P8Instrument *P8InstrumentWrangler::connectToInstrument(string ipv4address,int gpib_address,string name)
 {
+	//cout << "connectToInstrument (" << ipv4address << "," << gpib_address << "," << name << ") called" << endl;
 	for(list<P8Instrument*>::iterator it=instruments.begin();it!=instruments.end();it++)
 		if((*it)->instrument_name==name)
 		{	
@@ -35,7 +36,7 @@ P8Instrument *P8InstrumentWrangler::connectToInstrument(string ipv4address,int g
 	if(device==NULL)
 	{
 		stringstream ss;
-		ss << "unable to connect to device: " << prologix_wrangler.last_error;
+		ss << "unable to connect to device " << ipv4address << " " << gpib_address << ": " << prologix_wrangler.last_error;
 		last_error=ss.str();
 		return NULL;
 	}
@@ -61,7 +62,7 @@ P8Instrument *P8InstrumentWrangler::createInstrument(P8PrologixGPIBDevice *devic
 	{
 //		stringstream ss;
 		//ss << "Unable to identify device " << deviceid << " that is to be " << name " returning generic device" << endl;
-		return NULL;
+		//return NULL;
 		cerr << "Unable to identify device " << deviceid << " that is to be " << name << " returning generic device" << endl;
 		ret=new P8Instrument(device->getConnection()->GetIPv4Address(),device->getGPIBAddress(),name,device);
 		return ret;
@@ -254,10 +255,11 @@ SensorReading P8InstrumentWrangler::executeReadingScript(const SensorAddress &se
 		size_t colonpos=command.find(':');
 		instrument=command.substr(0,colonpos);
 		bool isquery=false;
-		if(command[colonpos+1]=='?') {isquery=true; colonpos++;};
+		if(command[colonpos+1]=='?') {isquery=true; colonpos++;}
+			else isquery=false;
 		string inst_command=command.substr(colonpos+1,string::npos);
 		while((inst_command.size()>0)&&(inst_command[0]==' ')) inst_command=inst_command.substr(1,inst_command.size()-1); //trim off leading spaces
-		if(inst_command.size()==0) cerr << "error, empty instrument command for insturment " << instrument << endl;
+		if(inst_command.size()==0) cerr << "warning, empty instrument command for insturment " << instrument << endl;
 		//TODO call instruments here
 		P8Instrument *pinstrument=getInstrument(instrument);
 		if(pinstrument==NULL) {instrument_error=true; break;}

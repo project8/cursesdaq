@@ -148,8 +148,8 @@ void P8SlowLogger::load_config_file(string fname)
 			string name,ip;
 			int gpib;
 			ss >> name >> ip >> gpib;
-			cerr << "Connecting to instrument: " << name << endl;
-			cout << "Connecting to instrument: " << name << endl;
+			cerr << "Connecting to instrument: " << name << " @ " << ip << " " << gpib << endl;
+			cout << "Connecting to instrument: " << name << " @ " << ip << " " << gpib << endl;
 			if(instrument_wrangler.connectToInstrument(ip,gpib,name)==NULL)
 			{
 				cerr << "Could not connect: " << instrument_wrangler.last_error << endl;

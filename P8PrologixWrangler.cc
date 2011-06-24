@@ -6,7 +6,7 @@
 #include <errno.h>
 #include <string.h>
 
-//#define PROLOGIX_DEBUG_ON
+#define PROLOGIX_DEBUG_ON
 	
 //-------------------P8PrologixConnection-------------
 P8PrologixConnection::P8PrologixConnection()
@@ -214,8 +214,9 @@ P8PrologixConnection *P8PrologixWrangler::connectToBox(const string &ipv4address
 
 P8PrologixGPIBDevice *P8PrologixWrangler::connectToDevice(const string &ipv4address,int gpib_address)
 {
+	last_error="";
 	#ifdef PROLOGIX_DEBUG_ON
-	cerr << "Connect to device called" << endl;
+	cerr << "connectToDevice( " << ipv4address << "," << gpib_address <<") called" << endl;
 	#endif
 	for(list<P8PrologixGPIBDevice*>::iterator it=open_devices.begin();it!=open_devices.end();it++)
 		if(((*it)->getConnection()->GetIPv4Address()==ipv4address)&&((*it)->getGPIBAddress()==gpib_address))
