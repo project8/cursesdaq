@@ -73,21 +73,6 @@ P8Instrument *P8InstrumentWrangler::createInstrument(P8PrologixGPIBDevice *devic
 SensorReading P8InstrumentWrangler::takeReading(const SensorAddress &sensor)
 {
 	return executeReadingScript(sensor);
-	/*
-	for(list<P8Instrument*>::iterator it=instruments.begin();it!=instruments.end();it++)
-	{
-		if((*it)->instrument_name==sensor.instrument_name)
-			return (*it)->takeReading(sensor);
-	}
-	SensorReading ret;
-	gettimeofday(&ret.timestamp,NULL);
-	ret.address=sensor;
-	ret.has_error=true;
-	stringstream ss;
-	ss << "Could not find instrument: " << sensor.instrument_name;
-	ret.error_value=ss.str();
-	return ret;
-	*/
 }
 
 //--------------------P8GenericLakeshoreInstrument----
@@ -138,9 +123,11 @@ P8GenericLakeshoreInstrument::P8GenericLakeshoreInstrument(string ip,int gpib,st
 	}
 }
 	
+//depricated
 SensorReading P8Instrument::takeReading(const SensorAddress &address)
 {
 	SensorReading ret;
+	/*
 	gettimeofday(&ret.timestamp,NULL);
 	
 	string reply=prologix_device->sendQuery(address.read_command);
@@ -156,6 +143,7 @@ SensorReading P8Instrument::takeReading(const SensorAddress &address)
 		ss << "blank reply returned from instrument.  TODO add further error analysis here." << endl;
 		ret.error_value=ss.str();
 	}
+	*/
 	return ret;
 }
 
@@ -173,6 +161,9 @@ SensorReading P8Instrument::sendQuery(string query,const SensorAddress &address)
 
 	if(reply!="")
 	{
+		//trim off non numbers
+		while((reply.size()!=0)&&(!isdigit(reply[0])))
+			reply=reply.substr(1,reply.size()-1);
 		ret.value=atof(reply.c_str());
 		ret.has_error=false;
 	} else

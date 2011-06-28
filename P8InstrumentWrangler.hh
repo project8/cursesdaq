@@ -37,8 +37,7 @@ public:
 
 	map<int,string> read_commands;
 	//Some specific ones:
-	//LS340 - SRDG? <A or B>
-	//LS475 - RDGFIELD?
+	//LS340 - SRDG? <A or B> //LS475 - RDGFIELD?
 	//LS218 - SRDG? <n>
 
 	int precision;
@@ -81,8 +80,8 @@ class SensorAddress
 public:
 	SensorAddress() {};
 	SensorAddress(string iname,string command) {instrument_name=iname; read_command=command;};
-	string instrument_name;
-	string read_command;
+	string instrument_name; //depricated
+	string read_command; //these are the commands sent to instruments
 };
 
 class SensorReading

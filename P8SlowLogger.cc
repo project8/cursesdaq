@@ -6,6 +6,7 @@
 #include <sys/time.h>
 using namespace std;
 
+//the difference in seconds between two timevals
 double seconds_difference(const struct timeval &now,const struct timeval &before);
 
 
@@ -15,6 +16,7 @@ P8SlowLoggerSensor::P8SlowLoggerSensor()
 	last_reading.timestamp.tv_usec=0;
 }
 
+//retrieve the last reading from a sensor named sensor name
 SensorReading P8SlowLogger::getLastReading(string sensor_name)
 {
 	SensorReading ret;
@@ -33,6 +35,7 @@ SensorReading P8SlowLogger::getLastReading(string sensor_name)
 	return ret;
 }
 
+//the main thread of the logger.  periodically calls doLog
 int P8SlowLogger::run()
 {
 	running=true;
@@ -47,6 +50,7 @@ int P8SlowLogger::run()
 	return 0;
 }
 	
+//prints out a sensor reading to a string
 string P8SlowLogger::printSensorReading(SensorReading &reading)
 {
 	char reading_timestamp[256];
@@ -59,6 +63,7 @@ string P8SlowLogger::printSensorReading(SensorReading &reading)
 	return string(outline);
 }
 	
+//checks if its time to read a sensor, if so, reads it and logs it
 void P8SlowLogger::doLog(P8SlowLoggerSensor &sensor)
 {
 	//if its been too short a time, return
@@ -83,22 +88,19 @@ void P8SlowLogger::doLog(P8SlowLoggerSensor &sensor)
 			if(valchange<sensor.min_change_for_logging) return;
 		}
 	}
+	//record the reading
 	sensor.access_mutex.Lock();
 	sensor.last_reading=reading;
 	sensor.access_mutex.UnLock();
-	//string outfilename=getLogFileName();
 	string outfilename=getLogFileNameFromName(sensor.log_name);
 	string outline=printSensorReading(reading);
-//	char reading_timestamp[256];
-//	strftime(reading_timestamp,256,"%Y-%m-%d %H:%M:%S",localtime(&reading.timestamp.tv_sec));
-//	char outline[512];
-//	sprintf(outline,"%-32s %s.%06d %g %s",reading.sensor_name.c_str(),reading_timestamp,(int)reading.timestamp.tv_usec,reading.value,reading.units.c_str());
+	//print the reading to the log file
 	ofstream out(outfilename.c_str(),ios::app);
-	//out << reading << endl;
 	out << outline << endl;
 	out.close();
 }
 	
+//returns the default log file name
 string P8SlowLogger::getLogFileName()
 {
 	struct timeval tv;
@@ -111,6 +113,7 @@ string P8SlowLogger::getLogFileName()
 	return string(fname);
 }
 
+//adds date and .log to log file stub
 string P8SlowLogger::getLogFileNameFromStub(string stub)
 {
 	struct timeval tv;
@@ -123,6 +126,7 @@ string P8SlowLogger::getLogFileNameFromStub(string stub)
 	return string(fname);
 }
 
+//retrieves the specific log file a sensor is asking for
 string P8SlowLogger::getLogFileNameFromName(string name)
 {
 	map<string,string>::iterator found=log_file_names.find(name);
@@ -130,7 +134,7 @@ string P8SlowLogger::getLogFileNameFromName(string name)
 	return getLogFileNameFromStub((*found).second);
 }
 
-
+//loads a configuration file with instruments, sensors, and logfile definitions
 void P8SlowLogger::load_config_file(string fname)
 {
 	ifstream fin(fname.c_str());
@@ -207,6 +211,7 @@ void P8SlowLogger::load_config_file(string fname)
 	}
 }
 
+//returs the difference between two timevals in seconds
 double seconds_difference(const struct timeval &now,const struct timeval &before)
 {
 	double ret=0;
