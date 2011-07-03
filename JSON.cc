@@ -294,8 +294,12 @@ bool JSONValue::operator<(const JSONValue &v) const
 			return getDoubleValue()<v.getDoubleValue();
 		case ARRAY:
 			return getArrayValue()<v.getArrayValue();
+		case OBJECT:
+			return getObjectValue()<v.getObjectValue();
 		case BOOLEAN:
 			return getBoolValue()<v.getBoolValue();
+		case JSONNULL:
+			return false;
 	}
 	return false;
 }
@@ -318,6 +322,8 @@ void JSONValue::delete_data() {
 		case BOOLEAN:
 			delete ((bool*)data);
 			return;
+		case OBJECT:
+			delete ((JSONObject*)data);
 		case JSONNULL:
 			return;
 	}

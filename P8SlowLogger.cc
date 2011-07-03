@@ -63,6 +63,22 @@ string P8SlowLogger::printSensorReading(SensorReading &reading)
 	return string(outline);
 }
 	
+JSONObject P8SlowLogger::getJSONReading(SensorReading &reading) {
+	JSONObject ret;
+	ret["sensor_name"]=reading.sensor_name;
+//TODO check this is the right timestamp format
+	ret["timestamp_seconds"].setIntValue(reading.timestamp.tv_sec);
+	ret["timestamp_useconds"].setIntValue(reading.timestamp.tv_usec);
+	ret["value"]=reading.value;
+	ret["units"]=reading.units;
+	ret["precision"]=reading.precision;
+	if(reading.has_error) {
+		ret["has_error"].setBoolValue(true);
+		ret["error_value"].setStringValue(reading.error_value);
+	}
+	return ret;
+}
+	
 //checks if its time to read a sensor, if so, reads it and logs it
 void P8SlowLogger::doLog(P8SlowLoggerSensor &sensor)
 {
@@ -98,6 +114,17 @@ void P8SlowLogger::doLog(P8SlowLoggerSensor &sensor)
 	ofstream out(outfilename.c_str(),ios::app);
 	out << outline << endl;
 	out.close();
+	if(couch_logging_on) {
+		JSONObject document=getJSONReading(reading);
+		couchdb_mutex.Lock();
+		if(!couchdb.sendDocument(document)) {
+		if(couchdb.getLastCurlError()!="")
+			cerr << "Curl error with database access: " << couchdb.getLastCurlError() << endl;
+		else
+			cerr << "Database responded with error: " << couchdb.getLastCouchResult() << endl;
+		}
+		couchdb_mutex.UnLock();
+	}
 }
 	
 //returns the default log file name
@@ -193,6 +220,14 @@ void P8SlowLogger::load_config_file(string fname)
 			string name,filename;
 			ss >> name >> filename;
 			log_file_names[name]=filename;
+		} else if (type=="DATABASE")
+		{ 
+			string host,port,dbname;
+			ss >> host >> port >> dbname;
+			couchdb.setServer(host);
+			couchdb.setPort(port);
+			couchdb.setDBName(dbname);
+			couch_logging_on=true;
 		} else
 		{
 			cerr << "unrecognized type in config file: " << type << endl;

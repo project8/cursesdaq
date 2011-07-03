@@ -3,13 +3,14 @@
 #pragma once
 #include "P8InstrumentWrangler.hh"
 #include "Thread.h"
+#include "CouchDBInterface.hh"
 
 class P8SlowLoggerSensor;
 
 class P8SlowLogger : public Thread
 {
 public:
-	P8SlowLogger() : log_file_name("./log") {sleep_time_usec=10000;};
+	P8SlowLogger() : log_file_name("./log") {sleep_time_usec=10000; couch_logging_on=false;};
 
 	void load_config_file(string fname);
 	SensorReading getLastReading(string sensor_name);
@@ -17,6 +18,7 @@ public:
 	string getLogFileNameFromStub(string stub);
 	string getLogFileNameFromName(string name);
 	string printSensorReading(SensorReading &reading);
+	JSONObject getJSONReading(SensorReading &reading);
 
 	//call start_thread() to start
 	void stop() {running=false;};
@@ -30,6 +32,11 @@ public:
 private:
 	virtual int run();
 	void doLog(P8SlowLoggerSensor &sensor);
+
+	
+	P8Mutex couchdb_mutex;
+	CouchDBInterface couchdb;
+	bool couch_logging_on;
 };
 
 //This represents a sensor to be logged

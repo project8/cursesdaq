@@ -11,6 +11,9 @@ CouchDBInterface::CouchDBInterface() {
 	if(!global_init_done) curl_global_init(CURL_GLOBAL_ALL);
 	global_init_done=true;
 	handle=curl_easy_init();
+	if(handle==NULL) {
+		cerr << "ERROR: Unable to init curl, db access will not work" << endl;
+	}
 }
 
 CouchDBInterface::~CouchDBInterface() {

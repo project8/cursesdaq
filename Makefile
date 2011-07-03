@@ -7,14 +7,14 @@ TARGETDIR := .
 
 CXXFLAGS := $(CXXFLAGS) -I ../common/ -I/usr/include/ -I/usr/include/ncurses -g 
 
-OBJECTS := P8Mutex.o P8Socket.o P8EthernetSocket.o P8PrologixWrangler.o P8InstrumentWrangler.o Thread.o P8SlowLogger.o NcursesInterface.o
+OBJECTS := P8Mutex.o P8Socket.o P8EthernetSocket.o P8PrologixWrangler.o P8InstrumentWrangler.o Thread.o P8SlowLogger.o NcursesInterface.o JSON.o CouchDBInterface.o
 TARGETS := prologix_test p8_logger visual_daq
 SCRIPTS := sensors.config
 
 vpath %.o $(OBJDIR)
 
 LIBS :=
-LINKEDLIBS := -lm -lpthread -lncurses
+LINKEDLIBS := -lm -lpthread -lncurses -lcurl
 
 OBJECTS_WDIR = $(patsubst %.o,$(OBJDIR)/%.o,$(OBJECTS))
 TARGETS_WDIR = $(patsubst %,$(TARGETDIR)/%,$(TARGETS))
