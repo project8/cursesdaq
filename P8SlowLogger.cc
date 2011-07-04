@@ -66,10 +66,11 @@ string P8SlowLogger::printSensorReading(SensorReading &reading)
 JSONObject P8SlowLogger::getJSONReading(SensorReading &reading) {
 	JSONObject ret;
 	ret["sensor_name"]=reading.sensor_name;
-//TODO check this is the right timestamp format
-	ret["timestamp_seconds"].setIntValue(reading.timestamp.tv_sec);
-	ret["timestamp_useconds"].setIntValue(reading.timestamp.tv_usec);
-	ret["value"]=reading.value;
+	ret["timestamp_mseconds"].setIntValue(reading.timestamp.tv_sec*1000+reading.timestamp.tv_usec/1000);
+	char reading_timestamp[256];
+	strftime(reading_timestamp,256,"%Y-%m-%d %H:%M:%S",localtime(&reading.timestamp.tv_sec));
+	ret["timestamp_localstring"].setStringValue(reading_timestamp);
+	ret["value"].setDoubleValue(reading.value);
 	ret["units"]=reading.units;
 	ret["precision"]=reading.precision;
 	if(reading.has_error) {
