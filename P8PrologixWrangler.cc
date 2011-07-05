@@ -229,6 +229,7 @@ P8PrologixGPIBDevice *P8PrologixWrangler::connectToDevice(const string &ipv4addr
 	P8PrologixConnection *connection=connectToBox(ipv4address);
 	if(connection==NULL) return NULL;
 	P8PrologixGPIBDevice *ret=new P8PrologixGPIBDevice(connection,gpib_address,"");
+/*
 	ret->setName(ret->getID());
 	if(ret->getName()=="")
 	{
@@ -238,6 +239,7 @@ P8PrologixGPIBDevice *P8PrologixWrangler::connectToDevice(const string &ipv4addr
 		last_error=ss.str();
 		return NULL;
 	}
+*/
 	open_devices.push_back(ret);
 	#ifdef PROLOGIX_DEBUG_ON
 			cerr << "created device " << ret << " , returning" << endl;
