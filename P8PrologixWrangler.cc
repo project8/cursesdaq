@@ -34,7 +34,8 @@ bool P8PrologixConnection::Connect()
 	good&=send_box_command_nolock("++mode 1");
 	good&=send_box_command_nolock("++auto 0");
 	good&=send_box_command_nolock("++eoi 1");
-	good&=send_box_command_nolock("++eos 3");
+	//good&=send_box_command_nolock("++eos 3");
+	good&=send_box_command_nolock("++eos 0");
 	//TODO check version is compatible
 	unlock_box();
 	//setup the read timeout (keep outside of lock)
