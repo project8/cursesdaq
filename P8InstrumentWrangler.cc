@@ -50,7 +50,8 @@ P8Instrument *P8InstrumentWrangler::createInstrument(P8PrologixGPIBDevice *devic
 	if(device==NULL) {cerr << "error, null device in createInstrument" << endl; return NULL;}
 	if(device->getConnection()==NULL) {cerr << "error, device has NULL connection in createInstrument" << endl; return NULL;}
 	P8Instrument *ret=NULL;
-	string deviceid=device->getID();
+//	string deviceid=device->getID();
+	string deviceid="";
 	if((deviceid.size()>4)&&(deviceid.substr(0,4)=="LSCI"))
 	{
 		ret=new P8GenericLakeshoreInstrument(device->getConnection()->GetIPv4Address(),device->getGPIBAddress(),name,deviceid,device);

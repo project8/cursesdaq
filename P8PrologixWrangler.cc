@@ -6,14 +6,14 @@
 #include <errno.h>
 #include <string.h>
 
-//#define PROLOGIX_DEBUG_ON
+#define PROLOGIX_DEBUG_ON
 	
 //-------------------P8PrologixConnection-------------
 P8PrologixConnection::P8PrologixConnection()
 {
 	SetPort("1234");
 	last_address=-1;
-	query_timeout_ms=500;
+	query_timeout_ms=1000;
 }
 
 P8PrologixConnection::P8PrologixConnection(string ipv4address)
@@ -21,7 +21,7 @@ P8PrologixConnection::P8PrologixConnection(string ipv4address)
 	SetPort("1234");
 	SetIPv4Address(ipv4address);
 	last_address=-1;
-	query_timeout_ms=500;
+	query_timeout_ms=1000;
 }
 	
 bool P8PrologixConnection::Connect()
