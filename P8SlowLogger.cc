@@ -45,6 +45,14 @@ void P8SlowLoggerSensor_Cal::setCalibrationValues()
 			units = temp.replace(0,1,"");
 			continue; 	
 		}
+		if(line[0] == '$') 
+		{ 
+			stringstream s(line);
+			string temp; 
+			s >> temp;
+			xaxis = temp.replace(0,1,"");
+			continue; 	
+		}
 		stringstream ss(line);
 		string x;
 		string y;
@@ -61,9 +69,27 @@ double P8SlowLoggerSensor_Cal::getCalibratedValue(double orig_value)
 	double slope;
 	double intcpt;
 	int index;
+	double cal_x; 
+	if(xaxis == "log")
+	{
+		cal_x = log(orig_value);
+	} 
+	else if (xaxis = "log10")
+	{
+		cal_x = log10(orig_value);
+	}
+	else if (xaxis = "exp")
+	{
+		cal_x = exp(orig_value);
+	}
+	else (xaxis = "linear")
+	{
+		cal_x = orig_value; 
+	}
 	for(vector<double>::const_iterator it = lookup_x.begin(); it != lookup_x.end(); it++)
 	{
-		if(orig_value <= *it) break;
+		if(cal_x <= *it) break;
+		//if(orig_value <= *it) break;
 		index++;
 	}	
 

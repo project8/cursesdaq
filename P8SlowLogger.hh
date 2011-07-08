@@ -80,12 +80,12 @@ public:
 	string units;
 	string log_name;
 
+	string xaxis; 
+
 	vector<double> lookup_x;
 	vector<double> lookup_y; 	
 	
 	void setCalibrationValues();
 	double getCalibratedValue(double orig_value); 
-//	double slope;
-//	double intcpt; 
 	P8Mutex access_mutex;
 };
