@@ -74,15 +74,15 @@ double P8SlowLoggerSensor_Cal::getCalibratedValue(double orig_value)
 	{
 		cal_x = log(orig_value);
 	} 
-	else if (xaxis = "log10")
+	else if (xaxis == "log10")
 	{
 		cal_x = log10(orig_value);
 	}
-	else if (xaxis = "exp")
+	else if (xaxis == "exp")
 	{
 		cal_x = exp(orig_value);
 	}
-	else (xaxis = "linear")
+	else if(xaxis == "linear")
 	{
 		cal_x = orig_value; 
 	}
@@ -95,7 +95,7 @@ double P8SlowLoggerSensor_Cal::getCalibratedValue(double orig_value)
 
 	slope = (lookup_y[index]-lookup_y[index-1])/(lookup_x[index]-lookup_x[index-1]);
 	intcpt = lookup_y[index] - slope * lookup_x[index]; 
-	calibrated_value = slope * orig_value + intcpt; 
+	calibrated_value = slope * cal_x + intcpt; 
 
 	return calibrated_value; 
 }

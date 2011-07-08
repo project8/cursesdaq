@@ -19,7 +19,7 @@ int main(int argc,char *argv[])
 	}
 	refreshrate=5;
 	vector<string> sensor_names;
- 
+
 	logger.load_config_file("sensors.config");
 	for(list<P8SlowLoggerSensor>::iterator it=logger.sensors.begin();it!=logger.sensors.end();it++)
 		sensor_names.push_back((*it).name);
