@@ -19,12 +19,14 @@ int main(int argc,char *argv[])
 	}
 	refreshrate=5;
 	vector<string> sensor_names;
-
+ 
 	logger.load_config_file("sensors.config");
 	for(list<P8SlowLoggerSensor>::iterator it=logger.sensors.begin();it!=logger.sensors.end();it++)
 		sensor_names.push_back((*it).name);
+	for(list<P8SlowLoggerSensor_Cal>::iterator it=logger.sensors_cal.begin();it!=logger.sensors_cal.end();it++)
+		sensor_names.push_back((*it).name);
 	logger.start_thread();
-
+ 
 	ScreenControl screencontrol;
 	screencontrol.init();
     init_pair(1,COLOR_GREEN,COLOR_BLACK);

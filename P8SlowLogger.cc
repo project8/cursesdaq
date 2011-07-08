@@ -5,6 +5,8 @@
 #include <fstream>
 #include <sys/time.h>
 #include <vector> 
+#include <string>
+#include <cstdlib>
 using namespace std;
 
 //the difference in seconds between two timevals
@@ -26,11 +28,12 @@ P8SlowLoggerSensor_Cal::P8SlowLoggerSensor_Cal()
 //INTERPOLATION BETWEEN TWO POINTS TO CALIBRATE
 void P8SlowLoggerSensor_Cal::setCalibrationValues()
 {
-	ifstream fin(name.append(".calib"));
+	string temp_name = name.append(".calib");
+	ifstream fin(temp_name.c_str());//name.append(".calib"));
 	if(!fin.good()) cerr<< "cannot open calib file" << endl;
 	string line;
 
-	while(getline(fin,line))						//NEED TO PARSE IN UNITS FROM CALIB FILE
+	while(getline(fin,line))					
 	{
 		if(line=="") continue;
 		if(line[0] == '#') continue;
@@ -58,7 +61,7 @@ double P8SlowLoggerSensor_Cal::getCalibratedValue(double orig_value)
 	double slope;
 	double intcpt;
 	int index;
-	for(vector<double>::const_iteratore it = lookup_x.begin(); it != lookup_x.end(); it++)
+	for(vector<double>::const_iterator it = lookup_x.begin(); it != lookup_x.end(); it++)
 	{
 		if(orig_value <= *it) break;
 		index++;
@@ -78,6 +81,16 @@ SensorReading P8SlowLogger::getLastReading(string sensor_name)
 	ret.has_error=true;
 	ret.error_value="Sensor Not Found";
 	for(list<P8SlowLoggerSensor>::iterator it=sensors.begin();it!=sensors.end();it++)
+	{
+		if((*it).name==sensor_name)
+		{
+			(*it).access_mutex.Lock();
+			ret=(*it).last_reading;
+			(*it).access_mutex.UnLock();
+			break;
+		}
+	}
+	for(list<P8SlowLoggerSensor_Cal>::iterator it=sensors_cal.begin();it!=sensors_cal.end();it++)
 	{
 		if((*it).name==sensor_name)
 		{

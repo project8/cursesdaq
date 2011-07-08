@@ -4,8 +4,11 @@
 #include "P8InstrumentWrangler.hh"
 #include "Thread.h"
 #include "CouchDBInterface.hh"
+#include <vector>
+#include <string>
 
 class P8SlowLoggerSensor;
+class P8SlowLoggerSensor_Cal;
 
 class P8SlowLogger : public Thread
 {
