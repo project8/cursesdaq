@@ -7,6 +7,7 @@
 #include <vector> 
 #include <string>
 #include <cstdlib>
+#include <algorithm>
 using namespace std;
 
 //the difference in seconds between two timevals
@@ -24,20 +25,26 @@ P8SlowLoggerSensor_Cal::P8SlowLoggerSensor_Cal()
 {
 	last_reading.timestamp.tv_sec=0;
 	last_reading.timestamp.tv_usec=0;
+	logx=false;
+	logy=false;
 }
 //INTERPOLATION BETWEEN TWO POINTS TO CALIBRATE
-void P8SlowLoggerSensor_Cal::setCalibrationValues()
+void P8SlowLoggerSensor_Cal::setCalibrationValues(string calfile)
 {
-	string temp_name = name.append(".calib");
-	ifstream fin(temp_name.c_str());//name.append(".calib"));
-	if(!fin.good()) cerr<< "cannot open calib file" << endl;
+//	string temp_name = name.append(".calib");
+//	ifstream fin(temp_name.c_str());//name.append(".calib"));
+	ifstream fin(calfile.c_str());
+	if(!fin.good()) cerr<< "cannot open calib file" << calfile << endl;
 	string line;
 
 	while(getline(fin,line))					
 	{
 		if(line=="") continue;
-		if(line[0] == '#') continue;
-		if(line[0] == '!') 
+		if(line[0] == '#') {
+			if(line.substr(1,line.size()-1)=="logx") logx=true;
+			if(line.substr(1,line.size()-1)=="logy") logy=true;
+			continue;
+		} else if(line[0] == '!') 
 		{ 
 			stringstream s(line);
 			string temp; 
@@ -45,6 +52,7 @@ void P8SlowLoggerSensor_Cal::setCalibrationValues()
 			units = temp.replace(0,1,"");
 			continue; 	
 		}
+		/*
 		if(line[0] == '$') 
 		{ 
 			stringstream s(line);
@@ -53,18 +61,21 @@ void P8SlowLoggerSensor_Cal::setCalibrationValues()
 			xaxis = temp.replace(0,1,"");
 			continue; 	
 		}
+		*/
 		stringstream ss(line);
-		string x;
-		string y;
-		ss >> x;
-		ss >> y;
-		lookup_x.push_back(atof(x.c_str()));
-		lookup_y.push_back(atof(y.c_str()));
+		double x,y;
+		ss >> x >> y;
+		calibration_lookup.push_back(make_pair(x,y));
+//		lookup_x.push_back(atof(x.c_str()));
+//		lookup_y.push_back(atof(y.c_str()));
 	}	
+	//sort by x values (then by y values)
+	sort(calibration_lookup.begin(),calibration_lookup.end());
 	fin.close();
 }
 double P8SlowLoggerSensor_Cal::getCalibratedValue(double orig_value)
 {
+	/*
 	double calibrated_value;
 	double slope;
 	double intcpt;
@@ -96,8 +107,39 @@ double P8SlowLoggerSensor_Cal::getCalibratedValue(double orig_value)
 	slope = (lookup_y[index]-lookup_y[index-1])/(lookup_x[index]-lookup_x[index-1]);
 	intcpt = lookup_y[index] - slope * lookup_x[index]; 
 	calibrated_value = slope * cal_x + intcpt; 
-
 	return calibrated_value; 
+	*/
+	double x=orig_value;
+	double x1,x2,y1,y2;
+	if(orig_value<calibration_lookup[0].first) {
+		x1=calibration_lookup[0].first;
+		x2=calibration_lookup[1].first;
+		y1=calibration_lookup[0].second;
+		y2=calibration_lookup[1].second;	
+	} else
+	for(size_t i=0;(i+1)<calibration_lookup.size();i++) {
+		if(((orig_value>calibration_lookup[i].first)&&
+		   (orig_value<calibration_lookup[i+1].first))||
+				(i+2==calibration_lookup.size())) {
+			x1=calibration_lookup[i].first;
+			x2=calibration_lookup[i+1].first;
+			y1=calibration_lookup[i].second;
+			y2=calibration_lookup[i+1].second;
+			break;
+		}
+	}
+	if(logx) {
+		x=log(x);
+		x1=log(x1);
+		x2=log(x2);
+	}
+	if(logy) {
+		y1=log(y1);
+		y2=log(y2);
+	}
+	double y=y1+(y2-y1)*(x-x1)/(x2-x1);
+	if(logy) y=exp(y);
+	return y;
 }
 
 //retrieve the last reading from a sensor named sensor name
@@ -383,7 +425,8 @@ void P8SlowLogger::load_config_file(string fname)
 			getline(ss,com,'\"');
 			string un;
 			string mylogfile;
-		    ss >> minlts >> maxlts >> minch >> un >> mylogfile;
+			string mycalfile;
+		    ss >> minlts >> maxlts >> minch >> un >> mylogfile >> mycalfile;
 			cerr << "adding sensor " << name << endl;
 			cout << "adding sensor " << name << endl;
 			P8SlowLoggerSensor_Cal toadd;
@@ -395,7 +438,7 @@ void P8SlowLogger::load_config_file(string fname)
 			toadd.units=un;
 			toadd.last_reading.precision=4;
 			toadd.log_name=mylogfile;
-			toadd.setCalibrationValues();				//SETS CALIBRATION 
+			toadd.setCalibrationValues(mycalfile);				//SETS CALIBRATION 
 			sensors_cal.push_back(toadd);
 		}else if (type=="LOGFILE") 
 		{

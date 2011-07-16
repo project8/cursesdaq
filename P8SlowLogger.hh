@@ -80,12 +80,16 @@ public:
 	string units;
 	string log_name;
 
-	string xaxis; 
+//	string xaxis; 
 
-	vector<double> lookup_x;
-	vector<double> lookup_y; 	
+//	vector<double> lookup_x;
+//	vector<double> lookup_y; 	
 	
-	void setCalibrationValues();
+	void setCalibrationValues(string calfile);
 	double getCalibratedValue(double orig_value); 
 	P8Mutex access_mutex;
+
+	vector<pair<double,double> > calibration_lookup;
+	bool logx;
+	bool logy;
 };
