@@ -96,6 +96,10 @@ public:
 	struct timeval timestamp;
 	bool has_error;
 	string error_value;
+
+	bool is_calibrated;
+	double orig_value;
+	string orig_units;
 };
 
 ostream &operator<<(ostream &out,const SensorReading &d);

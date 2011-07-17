@@ -227,6 +227,10 @@ JSONObject P8SlowLogger::getJSONReading(SensorReading &reading) {
 		ret["has_error"].setBoolValue(true);
 		ret["error_value"].setStringValue(reading.error_value);
 	}
+	if(reading.is_calibrated) {
+		ret["uncalibrated_value"].setDoubleValue(reading.orig_value);
+		ret["uncalibrated_units"].setStringValue(reading.orig_units);
+	}
 	return ret;
 }
 	
@@ -290,6 +294,9 @@ void P8SlowLogger::doLog(P8SlowLoggerSensor_Cal &sensor)
 	SensorReading reading=instrument_wrangler.takeReading(sensor.address);
 	reading.sensor_name=sensor.name;
 	reading.units=sensor.units;								//
+	reading.is_calibrated=true;
+	reading.orig_value=reading.value;
+	reading.orig_units="unknown";
 	reading.value = sensor.getCalibratedValue(reading.value);				//REPLACES VALUE WITH CALIBRATED VALUE 
 	//if the reading hasn't changed significantly, skip it unless beyond max long spacing
 	if(timesincelast<sensor.max_log_time_spacing)

@@ -228,6 +228,8 @@ SensorReading::SensorReading()
 	units="UNDEFINED";
 	has_error=false;
 	error_value="UNDEFINED";
+	is_calibrated=false;
+	orig_value=0;
 }
 
 SensorReading P8InstrumentWrangler::executeReadingScript(const SensorAddress &sensor)
