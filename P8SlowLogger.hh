@@ -16,6 +16,7 @@ public:
 	P8SlowLogger() : log_file_name("./log") {sleep_time_usec=10000; couch_logging_on=false;};
 
 	void load_config_file(string fname);
+//	void load_config_file_json(string fname);
 	SensorReading getLastReading(string sensor_name);
 	double calibratedValue(SensorReading &reading);		//calibrates sensor reading
 	string getLogFileName();
@@ -77,6 +78,7 @@ public:
 	double min_log_time_spacing;
 	double max_log_time_spacing;
 	double min_change_for_logging;
+	string orig_units;
 	string units;
 	string log_name;
 

@@ -43,6 +43,10 @@ void P8SlowLoggerSensor_Cal::setCalibrationValues(string calfile)
 		if(line[0] == '#') {
 			if(line.substr(1,line.size()-1)=="logx") logx=true;
 			if(line.substr(1,line.size()-1)=="logy") logy=true;
+			if(line.size()>5&&(line.substr(1,5)=="units")) {
+				stringstream ss(line.substr(5,line.size()-1));
+				ss >> units;
+			}				
 			continue;
 		} else if(line[0] == '!') 
 		{ 
@@ -296,7 +300,7 @@ void P8SlowLogger::doLog(P8SlowLoggerSensor_Cal &sensor)
 	reading.units=sensor.units;								//
 	reading.is_calibrated=true;
 	reading.orig_value=reading.value;
-	reading.orig_units="unknown";
+	reading.orig_units=sensor.orig_units;
 	reading.value = sensor.getCalibratedValue(reading.value);				//REPLACES VALUE WITH CALIBRATED VALUE 
 	//if the reading hasn't changed significantly, skip it unless beyond max long spacing
 	if(timesincelast<sensor.max_log_time_spacing)
@@ -442,7 +446,7 @@ void P8SlowLogger::load_config_file(string fname)
 			toadd.min_log_time_spacing=minlts;
 			toadd.max_log_time_spacing=maxlts;
 			toadd.min_change_for_logging=minch;
-			toadd.units=un;
+			toadd.orig_units=un;
 			toadd.last_reading.precision=4;
 			toadd.log_name=mylogfile;
 			toadd.setCalibrationValues(mycalfile);				//SETS CALIBRATION 
@@ -486,3 +490,21 @@ double seconds_difference(const struct timeval &now,const struct timeval &before
 	ret+=1e-6*(((double)now.tv_usec)-((double)before.tv_usec));
 	return ret;
 }
+	
+/* TODO
+void P8SlowLogger::load_config_file_json(string fname)
+{
+	ifstream fin(fname.c_str());
+	if(!fin.good()) {
+		cerr << "error loading file " << fname << endl;
+		exit(0);
+	}
+	JSONObject config;
+	fin >> config;
+	fin.close();
+	couchdb.setServer(config["database"].getObjectValue()["host"]);
+	couchdb.setPort(config["database"].getObjectValue()["port"]);
+	couchdb.setDBName(config["database"].getObjectValue()["dbname"]);
+
+}
+*/
