@@ -6,7 +6,7 @@
 #include <errno.h>
 #include <string.h>
 
-#define PROLOGIX_DEBUG_ON
+//#define PROLOGIX_DEBUG_ON
 	
 //-------------------P8PrologixConnection-------------
 P8PrologixConnection::P8PrologixConnection()

@@ -44,7 +44,7 @@ void P8SlowLoggerSensor_Cal::setCalibrationValues(string calfile)
 			if(line.substr(1,line.size()-1)=="logx") logx=true;
 			if(line.substr(1,line.size()-1)=="logy") logy=true;
 			if(line.size()>5&&(line.substr(1,5)=="units")) {
-				stringstream ss(line.substr(5,line.size()-1));
+				stringstream ss(line.substr(6,line.size()-1));
 				ss >> units;
 			}				
 			continue;
@@ -132,6 +132,7 @@ double P8SlowLoggerSensor_Cal::getCalibratedValue(double orig_value)
 			break;
 		}
 	}
+//cerr << "name " << name << "x is " << x << " x1 " << x1 << " y1 " << y1 << " x2 " << x2 << " y2 " << y2 << endl; 
 	if(logx) {
 		x=log(x);
 		x1=log(x1);
