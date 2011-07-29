@@ -221,13 +221,15 @@ string P8SlowLogger::printCalibratedSensorReading(SensorReading &reading)
 JSONObject P8SlowLogger::getJSONReading(SensorReading &reading) {
 	JSONObject ret;
 	ret["sensor_name"]=reading.sensor_name;
-	ret["timestamp_mseconds"].setIntValue(reading.timestamp.tv_sec*1000+reading.timestamp.tv_usec/1000);
+	long long mseconds=((long long)reading.timestamp.tv_sec)*1000;
+	mseconds+=reading.timestamp.tv_usec/1000;
+	ret["timestamp_mseconds"].setIntValue(mseconds);
 	char reading_timestamp[256];
 	strftime(reading_timestamp,256,"%Y-%m-%d %H:%M:%S",localtime(&reading.timestamp.tv_sec));
 	ret["timestamp_localstring"].setStringValue(reading_timestamp);
 	ret["value"].setDoubleValue(reading.value);
-	ret["units"]=reading.units;
-	ret["precision"]=reading.precision;
+	ret["units"].setStringValue(reading.units);
+	ret["precision"].setDoubleValue(reading.precision);
 	if(reading.has_error) {
 		ret["has_error"].setBoolValue(true);
 		ret["error_value"].setStringValue(reading.error_value);

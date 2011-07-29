@@ -50,6 +50,7 @@ public:
 	JSONValue();
 	JSONValue(const JSONValue &v);
 	JSONValue(const string &s);
+	JSONValue(const long long &i);
 	JSONValue(const int &i);
 	JSONValue(const double &d);
 	JSONValue(const JSONArray &arr);
@@ -61,7 +62,7 @@ public:
 	bool operator<(const JSONValue &v) const;
 
 	void setStringValue(const string &s);
-	void setIntValue(int i);
+	void setIntValue(long long i);
 	void setDoubleValue(double d);
 	void setArrayValue(const JSONArray &r);
 	void setObjectValue(const JSONObject &o);
@@ -70,8 +71,8 @@ public:
 
 	const string & getStringValue() const;
 	string & getStringValue() ;
-	const int &getIntValue() const;
-	int &getIntValue() ;
+	const long long &getIntValue() const;
+	long long &getIntValue() ;
 	const double &getDoubleValue() const;
 	double &getDoubleValue() ;
 	const JSONArray &getArrayValue() const;
