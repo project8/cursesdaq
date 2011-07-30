@@ -223,7 +223,7 @@ JSONValue::JSONValue(const string &s) {
 	setStringValue(s);
 }
 
-JSONValue::JSONValue(const long long &i) {
+JSONValue::JSONValue(const long long int &i) {
 	data=NULL;
 	setIntValue(i);
 }
@@ -317,7 +317,7 @@ void JSONValue::delete_data() {
 			delete ((string*)data);
 			return;
 		case INTEGER:
-			delete ((long long*)data);
+			delete ((long long int*)data);
 			return;
 		case DOUBLE:
 			delete ((double*)data);
@@ -341,11 +341,11 @@ void JSONValue::setStringValue(const string &s) {
 	data=new string(s);
 }
 
-void JSONValue::setIntValue(long long i) {
+void JSONValue::setIntValue(long long int i) {
 	delete_data();
 	type=INTEGER;
 	data=new long;
-	*((long long*)data)=i;
+	*((long long int*)data)=i;
 }
 
 void JSONValue::setDoubleValue(double d) {
@@ -459,16 +459,16 @@ string &JSONValue::getStringValue() {
 }
 
 
-const long long &JSONValue::getIntValue() const {
+const long long int &JSONValue::getIntValue() const {
 #ifdef JSON_TYPE_ERRORS_ON
 	if(getType()!=INTEGER)
 	cerr << "Error requesting JSON int value from " << getTypeAsString() << endl;
 #endif
 
-	return *((long long*)data);
+	return *((long long int*)data);
 }
 
-long long &JSONValue::getIntValue() {
+long long int &JSONValue::getIntValue() {
 #ifdef JSON_TYPE_ERRORS_ON
 	if(getType()!=INTEGER)
 	{
@@ -477,7 +477,7 @@ long long &JSONValue::getIntValue() {
 	}
 #endif
 
-	return *((long long*)data);
+	return *((long long int*)data);
 }
 
 
