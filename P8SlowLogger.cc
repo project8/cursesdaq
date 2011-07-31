@@ -263,7 +263,8 @@ void P8SlowLogger::doLog(P8SlowLoggerSensor &sensor)
 		} else
 		{
 			double valchange=fabs(sensor.last_reading.value-reading.value);
-			if(valchange<sensor.min_change_for_logging) return;
+			//if(valchange<sensor.min_change_for_logging) return;
+			if(valchange<fabs(sensor.last_reading.value*sensor.min_change_for_logging)) return;
 		}
 	}
 	//record the reading
@@ -314,7 +315,8 @@ void P8SlowLogger::doLog(P8SlowLoggerSensor_Cal &sensor)
 		} else
 		{
 			double valchange=fabs(sensor.last_reading.value-reading.value);
-			if(valchange<sensor.min_change_for_logging) return;
+			//if(valchange<sensor.min_change_for_logging) return;
+			if(valchange<fabs(sensor.last_reading.value*sensor.min_change_for_logging)) return;
 		}
 	}
 	//record the reading
